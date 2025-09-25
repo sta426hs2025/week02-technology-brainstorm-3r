@@ -69,12 +69,12 @@ Regions with statistically significant read enrichment (peaks) are identified us
 
  ## More on Statistical Methods - Computational Analysis in ChIP-Seq  
 
-#### Statistical Modeling
 - **Data type:** Count data (number of reads mapped to genomic regions)
 - **Peak calling:** Sliding windows across the genome count reads in ChIP vs control samples.
 - **Probabilistic models:** Determine if counts are unexpectedly high.
 
 #### Methods:
+
 - **Negative Binomial (NB) models**:  
   - Handle overdispersion better than Poisson.  
   - Used in tools like `DESeq2`, `edgeR`, `DiffBind`.  
@@ -85,6 +85,44 @@ Regions with statistically significant read enrichment (peaks) are identified us
   - Prevents inflated false positives from millions of independent tests.
 
 - **Functional annotation:** Link peaks to nearby genes or regulatory elements.
+
+## Negative Binomial Model in ChIP-seq Peak Calling
+
+If \(X_i\) is the read count in region \(i\), then under the Negative Binomial (NB) model:
+
+![equation](https://latex.codecogs.com/svg.latex?\color{white}X_i%20\sim%20NB(\mu_i,%20\theta))
+
+Where:
+- ![equation](https://latex.codecogs.com/svg.latex?\color{white}\mu_i) is the **mean read count**, estimated from background (e.g., control or genomic average).
+- ![equation](https://latex.codecogs.com/svg.latex?\color{white}\theta) is the **dispersion parameter**, which controls the variance.
+
+The **variance** of the Negative Binomial distribution is:
+
+![equation](https://latex.codecogs.com/svg.latex?\color{white}Var(X_i)%20=%20\mu_i%20+%20\frac{\mu_i^2}{\theta})
+
+This allows **overdispersion** (variance > mean), which is common in sequencing data.
+
+---
+
+## Hypothesis Testing for Peak Calling
+
+We test whether a region is significantly enriched (a peak) by comparing the observed count to what is expected under the background NB model.
+
+**Null Hypothesis (H₀):**
+
+![equation](https://latex.codecogs.com/svg.latex?\color{white}X_i%20\sim%20NB(\mu_i,%20\theta))
+
+The read count in region \(i\) follows the background distribution — **not a peak**.
+
+**Alternative Hypothesis (Hₐ):**
+
+![equation](https://latex.codecogs.com/svg.latex?%5Ccolor%7Bwhite%7D%20X_i%20%5Ctext%7B%20significantly%20higher%20than%20expected%20under%20NB%20%7D%20%5CRightarrow%20%5Ctext%7B%20peak%20%7D)
+
+We compute a **p-value** or **false discovery rate (FDR)** to determine significance.  
+If it's below a chosen threshold (e.g., FDR < 0.05), we call the region a **peak**.
+
+
+
 
 ---
 
